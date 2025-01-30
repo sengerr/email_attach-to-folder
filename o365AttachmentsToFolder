@@ -1,0 +1,29 @@
+import os
+import extract_msg
+ 
+# Folder paths
+email_folder = r"C:\Users\USER\EMAIL"  # Folder where saved emails are located
+output_folder = r"C:\Users\USER\Documents\projects\EMAIL_project\"  # Folder where attachments will be saved
+ 
+# Create the output folder if it does not exist
+if not os.path.exists(output_folder):
+    os.makedirs(output_folder)
+ 
+# Iterate over files in the email folder
+for email_file in os.listdir(email_folder):
+    if email_file.endswith(".msg"):  # Check if the file is an Outlook email
+        email_path = os.path.join(email_folder, email_file)
+        # Use extract_msg to process the .msg file
+        try:
+            msg = extract_msg.Message(email_path)
+            msg.attachments  # List of attachments
+ 
+            # Extract attachments
+            for attachment in msg.attachments:
+                if attachment.longFilename.startswith("EWSTransactionSummary") and attachment.longFilename.endswith(".xls"):
+                    attachment_path = os.path.join(output_folder, attachment.longFilename)
+                    with open(attachment_path, 'wb') as file:
+                        file.write(attachment.data)
+                    print(f"Attachment saved: {attachment.longFilename}")
+        except Exception as e:
+            print(f"Error processing {email_file}: {e}")
